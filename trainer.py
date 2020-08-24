@@ -7,7 +7,6 @@ from tensorflow.keras.utils import to_categorical
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-
 def combine_training_data():
     full_training_set = []
     full_training_set_inputs = []
@@ -66,10 +65,14 @@ def train_lstm_model():
     train_images = normalize_data(train_images)
     test_images = normalize_data(test_images)
 
+    # filter size = 3x3 pixel groups for features
     num_filters = 128
     filter_size = 3
     pool_size = 2
 
+    # Input Shape = (72, 204, 1) due to image being a downscaled greyscale image to save memory / resources
+    # 64 indicates batch size
+    # Dense is 3 due to 3 output variables (gas, brake, turning)
     model = Sequential([
         TimeDistributed(Conv1D(num_filters, filter_size, batch_input_shape=(64, 72, 204, 1),
                                input_shape=(72, 204, 1), activation='relu')),
@@ -80,6 +83,7 @@ def train_lstm_model():
         Dense(3)
     ])
 
+    # Mean Squared Error to return back a value instead of a category
     # Compile the model.
     model.compile(
         'adam',
@@ -110,6 +114,8 @@ def train_cnn_model():
     filter_size = 3
     pool_size = 2
 
+    # Input Shape = (72, 204, 1) due to image being a downscaled greyscale image to save memory / resources
+    # Dense is 3 due to 3 output variables (gas, brake, turning)
     model = Sequential([
         Conv2D(num_filters, filter_size, input_shape=(72, 204, 1)),
         MaxPooling2D(pool_size=pool_size),
